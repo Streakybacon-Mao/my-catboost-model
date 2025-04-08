@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import pickle
 from catboost import CatBoostClassifier
+import shap
+import matplotlib.pyplot as plt
 
 # 加载模型
 with open('catboost_model.pkl', 'rb') as f:
@@ -17,14 +19,31 @@ categorical_vars = ['Alcohol', 'Hypertension', 'gender', 'Race/Ethnicity',
 
 # 连续变量的取值范围
 continuous_ranges = {
-    'BMI': (15, 50),
-    'Age': (0, 100),
-    'sleep': (0, 20),
-    'HEI2020': (0, 100),
-    'PIR': (0, 5),
-    'HDL_C': (10, 160),
-    'Triglycerides': (0, 50),
-    'Cholesterol': (2, 16)
+    'BMI': (15.0, 50.0),
+    'Age': (0.0, 100.0),
+    'sleep': (0.0, 20.0),
+    'HEI2020': (0.0, 100.0),
+    'PIR': (0.0, 5.0),
+    'HDL_C': (0.1, 16.0),
+    'Triglycerides': (0.0, 5.0),
+    'Cholesterol': (0.2, 16.0)
+}
+
+# 连续变量的单位和描述
+continuous_descriptions = {
+    'HDL_C': 'mmol/L',
+    'Triglycerides': 'mmol/L',
+    'Cholesterol': 'mmol/L',
+    'sleep': 'hours',
+    'PIR': 'ratio of household income to poverty line.',
+    'HEI2020': 'Healthy Eating Index-2020',
+    'PA': 'whether performed moderate-intensity physical activity'
+}
+
+# 分类变量的描述
+categorical_descriptions = {
+    'Alcohol': 'Whether consumed 12 drinks in the past year',
+    'smoke': 'whether smoked 100 cigarettes in total'
 }
 
 # 连续变量输入
@@ -32,7 +51,24 @@ st.header("Continuous Variables")
 continuous_input = {}
 for var in continuous_vars:
     min_val, max_val = continuous_ranges[var]
-    continuous_input[var] = st.slider(var, min_value=min_val, max_value=max_val, value=(min_val + max_val) // 2)
+    # 添加单位或描述
+    if var in continuous_descriptions:
+        description = continuous_descriptions[var]
+        continuous_input[var] = st.number_input(
+            f"{var} ({description})",
+            min_value=min_val,
+            max_value=max_val,
+            value=(min_val + max_val) / 2,
+            step=0.1  # 设置步长为0.1
+        )
+    else:
+        continuous_input[var] = st.number_input(
+            var,
+            min_value=min_val,
+            max_value=max_val,
+            value=(min_val + max_val) / 2,
+            step=0.1
+        )
 
 # 分类变量输入
 st.header("Categorical Variables")
@@ -73,7 +109,12 @@ special_vars = {
 # 处理特殊分类变量
 for var in special_vars:
     options = list(special_vars[var].values())
-    selected = st.selectbox(var, options)
+    # 添加描述
+    if var in categorical_descriptions:
+        description = categorical_descriptions[var]
+        selected = st.selectbox(f"{var} ({description})", options)
+    else:
+        selected = st.selectbox(var, options)
     # 将文本映射回数值
     categorical_input[var] = [k for k, v in special_vars[var].items() if v == selected][0]
 
@@ -93,8 +134,22 @@ input_df = input_df[training_features]
 
 # 预测
 if st.button("Predict"):
-    prediction = model.predict(input_df)
-    st.write(f"Prediction: {prediction[0]}")
+    # 获取预测概率
+    probabilities = model.predict_proba(input_df)
+    depression_probability = probabilities[0][1]  # 假设抑郁症为1
+
+    # 显示预测结果
+    st.write(f"probability of depression,: {depression_probability:.4f}")
+
+    # 使用SHAP解释预测
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(input_df)
+
+    # 绘制SHAP力图
+    plt.figure()
+    shap.force_plot(explainer.expected_value, shap_values[0], input_df.iloc[0], matplotlib=True, show=False)
+    plt.savefig("shap_force_plot.png", format='png', bbox_inches='tight')
+    st.image("shap_force_plot.png")
 
 # 可选：显示输入数据
 st.subheader("Input Data")
