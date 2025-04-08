@@ -137,14 +137,24 @@ if st.button("Predict"):
     # 获取预测概率
     probabilities = model.predict_proba(input_df)
     depression_probability = probabilities[0][1]  # 假设抑郁症为1
-
+    
+    # 获取预测类别
+    predicted_class = model.predict(input_df)
+    
     # 显示预测结果
-    st.write(f"probability of depression,: {depression_probability:.4f}")
-
+    st.write(f"Probability of depression: {depression_probability:.4f}")
+    st.write(f"Predicted Class: {predicted_class[0]}")
+    
+    # 根据预测类别显示不同的建议
+    if predicted_class[0] == 0:
+        st.write("According to the prediction results of our model, you have a low risk of depression. Please continue to maintain good living habits. If you have any discomfort, please seek medical attention promptly.")
+    else:
+        st.write("According to the prediction results of our model, you have a high risk of depression. Health issues are very important, please contact professional medical personnel promptly for medical advice.")
+    
     # 使用SHAP解释预测
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(input_df)
-
+    
     # 绘制SHAP力图
     plt.figure()
     shap.force_plot(explainer.expected_value, shap_values[0], input_df.iloc[0], matplotlib=True, show=False)
