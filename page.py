@@ -11,6 +11,9 @@ with open('catboost_model.pkl', 'rb') as f:
 
 # 创建UI
 st.title("Model Prediction of depression in diabetes patients")
+st.markdown(
+    "We respect your privacy. We do not collect any of your data in any form. Any data you submit is only used for prediction purposes."
+)
 
 # 定义变量
 continuous_vars = ['BMI', 'Age', 'sleep', 'HEI2020', 'PIR', 'HDL_C', 'Triglycerides', 'Cholesterol']
@@ -35,9 +38,9 @@ continuous_descriptions = {
     'Triglycerides': 'mmol/L',
     'Cholesterol': 'mmol/L',
     'sleep': 'hours',
-    'PIR': 'ratio of household income to poverty line.',
+    'PIR': 'ratio of household income to poverty line',
     'HEI2020': 'Healthy Eating Index-2020',
-    'PA': 'moderate-intensity physical activity(10 min/day)'
+    'PA': 'moderate-intensity physical activity'
 }
 
 # 分类变量的描述
@@ -164,3 +167,4 @@ if st.button("Predict"):
 # 可选：显示输入数据
 st.subheader("Input Data")
 st.write(input_df)
+
