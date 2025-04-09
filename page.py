@@ -37,7 +37,7 @@ continuous_descriptions = {
     'sleep': 'hours',
     'PIR': 'ratio of household income to poverty line.',
     'HEI2020': 'Healthy Eating Index-2020',
-    'PA': 'whether performed moderate-intensity physical activity'
+    'PA': 'moderate-intensity physical activity(10 min/day)'
 }
 
 # 分类变量的描述
