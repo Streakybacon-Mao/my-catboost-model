@@ -40,13 +40,13 @@ continuous_descriptions = {
     'sleep': 'hours',
     'PIR': 'ratio of household income to poverty line',
     'HEI2020': 'Healthy Eating Index-2020',
-    'PA': 'moderate-intensity physical activity'
 }
 
 # 分类变量的描述
 categorical_descriptions = {
     'Alcohol': 'Whether consumed 12 drinks in the past year',
-    'smoke': 'whether smoked 100 cigarettes in total'
+    'smoke': 'whether smoked 100 cigarettes in total',
+    'PA': 'moderate-intensity physical activity'
 }
 
 # 连续变量输入
